@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentTrack | Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="logo"><span>R</span>RentTrack</div>
+        <nav>
+            <a href="admin.html" class="active">Dashboard</a>
+            <a href="tenants.html">Tenants</a>
+            <a href="rooms.html">Rooms</a>
+        </nav>
+        <div class="sidebar-bottom">
+            <button type="button" class="sidebar-link logout-button">Log Out</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="dashboard-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Overview of your rooms, tenants and rent records.</p>
+            </div>
+            <div class="admin-profile">
+                <div class="profile-circle">A</div>
+                <div><strong>Administrator</strong><small>Admin</small></div>
+            </div>
+        </header>
+
+        <section class="summary-cards">
+            <div class="summary-card"><span>Total Rooms</span><strong id="totalRooms">0</strong></div>
+            <div class="summary-card"><span>Occupied Rooms</span><strong id="occupiedRooms">0</strong></div>
+            <div class="summary-card"><span>Vacant Rooms</span><strong id="vacantRooms">0</strong></div>
+            <div class="summary-card"><span>Active Tenants</span><strong id="activeTenants">0</strong></div>
+        </section>
+
+        <section class="dashboard-section">
+            <div class="section-heading">
+                <div><h2>Rent Reminders</h2><p>Tenants whose rent is expiring soon or has expired.</p></div>
+            </div>
+            <div id="rentReminders" class="reminder-list"></div>
+        </section>
+
+        <section class="dashboard-section">
+            <div class="section-heading">
+                <div><h2>Recent Payments</h2><p>Latest recorded rent payments.</p></div>
+            </div>
+            <div class="table-container">
+                <table id="recentPaymentsTable">
+                    <thead><tr><th>Tenant</th><th>Room</th><th>Amount</th><th>Payment Date</th><th>Expiry Date</th><th>Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="js/script.js"></script>
+</body>
+</html>
