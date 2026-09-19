@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentTrack | My Rent</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="logo"><span>R</span>RentTrack</div>
+        <nav><a href="tenant.html" class="active">My Rent</a></nav>
+        <div class="sidebar-bottom"><button type="button" class="sidebar-link logout-button">Log Out</button></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="dashboard-header">
+            <div>
+                <h1 id="tenantWelcome">Welcome</h1>
+                <p>Your rent information is shown below.</p>
+            </div>
+            <div class="admin-profile">
+                <div class="profile-circle" id="tenantProfileLetter">T</div>
+                <div><strong id="tenantProfileName">Tenant</strong><small>Tenant</small></div>
+            </div>
+        </header>
+
+        <section id="tenantNoRecord" class="dashboard-section hidden">
+            <h2>No rental record yet</h2>
+            <p>Your account has been created, but the administrator has not assigned your rental information yet.</p>
+        </section>
+
+        <div id="tenantRentContent">
+            <section class="summary-cards">
+                <div class="summary-card"><span>Room Number</span><strong id="myRoom">—</strong></div>
+                <div class="summary-card"><span>Rent Amount</span><strong id="myRent">—</strong></div>
+                <div class="summary-card"><span>Payment Date</span><strong id="myPaymentDate">—</strong></div>
+                <div class="summary-card"><span>Expiry Date</span><strong id="myExpiryDate">—</strong></div>
+            </section>
+
+            <section class="dashboard-section">
+                <div class="section-heading"><div><h2>Current Rent Status</h2><p>Your current payment status.</p></div></div>
+                <div id="myStatusBox" class="tenant-status-box"></div>
+            </section>
+        </div>
+        <section class="danger-zone dashboard-section">
+            <h2>Account</h2>
+            <p>Delete your RentTrack account when you no longer need it. This will also remove your current tenant record from the system.</p>
+            <button type="button" class="danger-button" id="deleteAccountButton">
+                Delete My Account
+            </button>
+        </section>
+    </main>
+</div>
+<script src="js/script.js"></script>
+</body>
+</html>
