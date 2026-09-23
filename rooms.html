@@ -41,6 +41,8 @@
     </main>
 </div>
 
+<!--ADD/EDIT ROOM MODAL-->
+
 <div class="modal" id="roomModal">
     <div class="modal-content">
         <div class="modal-header"><h2>Add Room</h2><button type="button" class="close-button" id="closeRoomModal">×</button></div>
@@ -53,6 +55,8 @@
     </div>
 </div>
 
+<!--VIEW ROOM MODAL-->
+
 <div class="modal" id="viewRoomModal">
     <div class="modal-content">
         <div class="modal-header"><h2>Room Details</h2><button type="button" class="close-button" id="closeViewRoomModal">×</button></div>
@@ -62,11 +66,33 @@
             <p><strong>Rent</strong><span id="viewRoomRent"></span></p>
             <p><strong>Status</strong><span id="viewRoomStatus"></span></p>
         </div>
-        <div class="occupants-section">
-            <h3>Current Occupant(s)</h3>
-            <div id="roomOccupantList" class="occupant-list"></div>
-        </div>
-    </div>
+
+<div class="occupants-section">
+
+    <h3>Current Occupant(s)</h3>
+
+    <div id="roomOccupantList" class="occupant-list"></div>
+
+</div>
+
+<div class="room-modal-actions">
+
+    <button
+        type="button"
+        class="edit-room-modal-button"
+        id="editRoomButton">
+        Edit Room
+    </button>
+
+    <button
+        type="button"
+        class="delete-room-modal-button"
+        id="deleteRoomButton">
+        Delete Room
+    </button>
+
+</div>
+</div>
 </div>
 
 <script src="js/script.js"></script>
