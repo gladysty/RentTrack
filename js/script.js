@@ -770,142 +770,851 @@ if (tenantTable) {
 const roomTable = document.getElementById("roomTable");
 
 if (roomTable) {
+
     if (requireRole("admin")) {
-        const roomSearch = document.getElementById("roomSearch");
-        const roomModal = document.getElementById("roomModal");
-        const viewRoomModal = document.getElementById("viewRoomModal");
-        const roomForm = document.getElementById("roomForm");
-        const roomFormError = document.getElementById("roomFormError");
+
+        const roomSearch =
+            document.getElementById("roomSearch");
+
+        const roomModal =
+            document.getElementById("roomModal");
+
+        const viewRoomModal =
+            document.getElementById("viewRoomModal");
+
+        const roomForm =
+            document.getElementById("roomForm");
+
+        const roomFormError =
+            document.getElementById("roomFormError");
+
+        const editRoomButton =
+            document.getElementById("editRoomButton");
+
+        const deleteRoomButton =
+            document.getElementById("deleteRoomButton");
+
+        let selectedRoomId = null;
+        let editingRoomId = null;
+
+
+        /* =========================
+           RENDER ROOMS
+        ========================= */
 
         function renderRooms(searchTerm = "") {
+
             const rooms = readData(KEYS.rooms);
-            const search = searchTerm.trim().toLowerCase();
+
+            const search =
+                searchTerm.trim().toLowerCase();
 
             const filtered = rooms.filter(room =>
-                String(room.number).toLowerCase().includes(search)
+                String(room.number)
+                    .toLowerCase()
+                    .includes(search)
             );
 
-            roomTable.querySelector("tbody").innerHTML = filtered.map(room => {
-                const occupants = getRoomOccupants(room.number).length;
-                const status = occupants > 0 ? "Occupied" : "Vacant";
 
-                return `
+            roomTable.querySelector("tbody").innerHTML =
+                filtered.map(room => {
+
+                    const occupants =
+                        getRoomOccupants(room.number).length;
+
+                    const status =
+                        occupants > 0
+                            ? "Occupied"
+                            : "Vacant";
+
+
+                    return `
+                        <tr>
+
+                            <td>${room.number}</td>
+
+                            <td>${occupants}</td>
+
+                            <td>
+                                ${formatMoney(room.rent)}
+                            </td>
+
+                            <td>
+                                ${statusHTML(status)}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="view-button view-room-button"
+                                    data-id="${room.id}">
+                                    View
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    `;
+
+                }).join("") || `
                     <tr>
-                        <td>${room.number}</td>
-                        <td>${occupants}</td>
-                        <td>${formatMoney(room.rent)}</td>
-                        <td>${statusHTML(status)}</td>
-                        <td>
-                            <button type="button" class="view-button view-room-button" data-id="${room.id}">
-                                View
-                            </button>
+                        <td colspan="5">
+                            No rooms found.
                         </td>
                     </tr>
                 `;
-            }).join("") || `
-                <tr><td colspan="5">No rooms found.</td></tr>
-            `;
 
-            const count = document.getElementById("roomSearchCount");
+
+            const count =
+                document.getElementById(
+                    "roomSearchCount"
+                );
+
+
             if (count) {
-                count.textContent = `${filtered.length} room${filtered.length === 1 ? "" : "s"} found`;
+
+                count.textContent =
+                    `${filtered.length} room${
+                        filtered.length === 1
+                            ? ""
+                            : "s"
+                    } found`;
+
             }
         }
 
+
         renderRooms();
 
-        roomSearch.addEventListener("input", () => {
-            renderRooms(roomSearch.value);
-        });
 
-        document.getElementById("addRoomButton").addEventListener("click", () => {
-            roomForm.reset();
-            roomFormError.textContent = "";
-            roomModal.style.display = "flex";
-        });
+        /* =========================
+           SEARCH
+        ========================= */
 
-        document.getElementById("closeRoomModal").addEventListener("click", () => {
-            roomModal.style.display = "none";
-        });
+        roomSearch.addEventListener(
+            "input",
+            () => {
 
-        document.getElementById("closeViewRoomModal").addEventListener("click", () => {
-            viewRoomModal.style.display = "none";
-        });
+                renderRooms(
+                    roomSearch.value
+                );
 
-        roomTable.addEventListener("click", event => {
-            const button = event.target.closest(".view-room-button");
-            if (!button) return;
+            }
+        );
 
-            const room = readData(KEYS.rooms).find(
-                item => item.id === button.dataset.id
+
+        /* =========================
+           ADD ROOM
+        ========================= */
+
+        document
+            .getElementById("addRoomButton")
+            .addEventListener(
+                "click",
+                () => {
+
+                    editingRoomId = null;
+
+                    roomForm.reset();
+
+                    roomFormError.textContent = "";
+
+                    roomModal
+                        .querySelector(".modal-header h2")
+                        .textContent =
+                        "Add Room";
+
+                    roomForm
+                        .querySelector(
+                            'button[type="submit"]'
+                        )
+                        .textContent =
+                        "Add Room";
+
+                    roomModal.style.display =
+                        "flex";
+
+                }
             );
 
-            if (!room) return;
 
-            const occupants = getRoomOccupants(room.number);
-            const status = occupants.length > 0 ? "Occupied" : "Vacant";
+        /* =========================
+           CLOSE ADD / EDIT MODAL
+        ========================= */
 
-            document.getElementById("viewRoomNumber").textContent = room.number;
-            document.getElementById("viewRoomOccupants").textContent = occupants.length;
-            document.getElementById("viewRoomRent").textContent = formatMoney(room.rent);
-            document.getElementById("viewRoomStatus").innerHTML = statusHTML(status);
+        document
+            .getElementById("closeRoomModal")
+            .addEventListener(
+                "click",
+                () => {
 
-            const occupantList = document.getElementById("roomOccupantList");
+                    roomModal.style.display =
+                        "none";
 
-            if (occupants.length === 0) {
-                occupantList.innerHTML = `
-                    <div class="empty-occupants">
-                        This room is currently vacant. There are no occupants assigned to it.
-                    </div>
-                `;
-            } else {
-                occupantList.innerHTML = occupants.map(tenant => `
-                    <div class="occupant-card">
-                        <h4>${tenant.name}</h4>
-                        <p><strong>Phone:</strong> ${tenant.phone}</p>
-                        <p><strong>Email:</strong> ${tenant.email}</p>
-                        <p><strong>Rent:</strong> ${formatMoney(tenant.rent)}</p>
-                        <p><strong>Payment Date:</strong> ${formatDate(tenant.paymentDate)}</p>
-                        <p><strong>Rent Expires:</strong> ${formatDate(tenant.expiryDate)}</p>
-                        <div class="occupant-status">
-                            ${statusHTML(getRentStatus(tenant.expiryDate))}
+                    editingRoomId = null;
+
+                }
+            );
+
+
+        /* =========================
+           CLOSE VIEW MODAL
+        ========================= */
+
+        document
+            .getElementById("closeViewRoomModal")
+            .addEventListener(
+                "click",
+                () => {
+
+                    viewRoomModal.style.display =
+                        "none";
+
+                    selectedRoomId = null;
+
+                }
+            );
+
+
+        /* =========================
+           VIEW ROOM
+        ========================= */
+
+        roomTable.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        ".view-room-button"
+                    );
+
+
+                if (!button) return;
+
+
+                const room =
+                    readData(KEYS.rooms).find(
+                        item =>
+                            item.id ===
+                            button.dataset.id
+                    );
+
+
+                if (!room) return;
+
+
+                selectedRoomId =
+                    room.id;
+
+
+                const occupants =
+                    getRoomOccupants(
+                        room.number
+                    );
+
+
+                const status =
+                    occupants.length > 0
+                        ? "Occupied"
+                        : "Vacant";
+
+
+                document
+                    .getElementById(
+                        "viewRoomNumber"
+                    )
+                    .textContent =
+                    room.number;
+
+
+                document
+                    .getElementById(
+                        "viewRoomOccupants"
+                    )
+                    .textContent =
+                    occupants.length;
+
+
+                document
+                    .getElementById(
+                        "viewRoomRent"
+                    )
+                    .textContent =
+                    formatMoney(
+                        room.rent
+                    );
+
+
+                document
+                    .getElementById(
+                        "viewRoomStatus"
+                    )
+                    .innerHTML =
+                    statusHTML(status);
+
+
+                const occupantList =
+                    document.getElementById(
+                        "roomOccupantList"
+                    );
+
+
+                if (occupants.length === 0) {
+
+                    occupantList.innerHTML = `
+
+                        <div class="empty-occupants">
+
+                            This room is currently vacant.
+                            There are no occupants assigned
+                            to it.
+
                         </div>
-                    </div>
-                `).join("");
+
+                    `;
+
+                } else {
+
+                    occupantList.innerHTML =
+                        occupants.map(
+                            tenant => `
+
+                            <div class="occupant-card">
+
+                                <h4>
+                                    ${tenant.name}
+                                </h4>
+
+                                <p>
+                                    <strong>Phone:</strong>
+                                    ${tenant.phone}
+                                </p>
+
+                                <p>
+                                    <strong>Email:</strong>
+                                    ${tenant.email}
+                                </p>
+
+                                <p>
+                                    <strong>Rent:</strong>
+                                    ${formatMoney(
+                                        tenant.rent
+                                    )}
+                                </p>
+
+                                <p>
+                                    <strong>Payment Date:</strong>
+                                    ${formatDate(
+                                        tenant.paymentDate
+                                    )}
+                                </p>
+
+                                <p>
+                                    <strong>Rent Expires:</strong>
+                                    ${formatDate(
+                                        tenant.expiryDate
+                                    )}
+                                </p>
+
+                                <div class="occupant-status">
+
+                                    ${statusHTML(
+                                        getRentStatus(
+                                            tenant.expiryDate
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        `
+                        ).join("");
+
+                }
+
+
+                viewRoomModal.style.display =
+                    "flex";
+
             }
+        );
 
-            viewRoomModal.style.display = "flex";
-        });
 
-        roomForm.addEventListener("submit", event => {
-            event.preventDefault();
-            roomFormError.textContent = "";
+        /* =========================
+           EDIT ROOM BUTTON
+        ========================= */
 
-            if (!roomForm.checkValidity()) {
-                roomForm.reportValidity();
-                return;
+        editRoomButton.addEventListener(
+            "click",
+            () => {
+
+                if (!selectedRoomId) {
+
+                    alert(
+                        "No room selected."
+                    );
+
+                    return;
+                }
+
+
+                const rooms =
+                    readData(KEYS.rooms);
+
+
+                const room =
+                    rooms.find(
+                        item =>
+                            item.id ===
+                            selectedRoomId
+                    );
+
+
+                if (!room) {
+
+                    alert(
+                        "Room record could not be found."
+                    );
+
+                    return;
+                }
+
+
+                editingRoomId =
+                    room.id;
+
+
+                document
+                    .getElementById(
+                        "roomNumber"
+                    )
+                    .value =
+                    room.number;
+
+
+                document
+                    .getElementById(
+                        "roomRent"
+                    )
+                    .value =
+                    room.rent;
+
+
+                roomFormError.textContent =
+                    "";
+
+
+                roomModal
+                    .querySelector(
+                        ".modal-header h2"
+                    )
+                    .textContent =
+                    "Edit Room";
+
+
+                roomForm
+                    .querySelector(
+                        'button[type="submit"]'
+                    )
+                    .textContent =
+                    "Save Changes";
+
+
+                viewRoomModal.style.display =
+                    "none";
+
+
+                roomModal.style.display =
+                    "flex";
+
             }
+        );
 
-            const number = document.getElementById("roomNumber").value.trim();
-            const rent = Number(document.getElementById("roomRent").value);
-            const rooms = readData(KEYS.rooms);
 
-            if (rooms.some(room => String(room.number) === String(number))) {
-                roomFormError.textContent = "That room number already exists.";
-                return;
+        /* =========================
+           DELETE ROOM BUTTON
+        ========================= */
+
+        deleteRoomButton.addEventListener(
+            "click",
+            () => {
+
+                if (!selectedRoomId) {
+
+                    alert(
+                        "No room selected."
+                    );
+
+                    return;
+                }
+
+
+                const rooms =
+                    readData(KEYS.rooms);
+
+
+                const room =
+                    rooms.find(
+                        item =>
+                            item.id ===
+                            selectedRoomId
+                    );
+
+
+                if (!room) {
+
+                    alert(
+                        "Room record could not be found."
+                    );
+
+                    return;
+                }
+
+
+                const occupants =
+                    getRoomOccupants(
+                        room.number
+                    );
+
+
+                /*
+                 * Do not allow an occupied
+                 * room to be deleted.
+                 */
+
+                if (occupants.length > 0) {
+
+                    alert(
+                        `Room ${room.number} cannot be deleted because it currently has ` +
+                        `${occupants.length} occupant${
+                            occupants.length === 1
+                                ? ""
+                                : "s"
+                        }.\n\n` +
+                        `Please remove or reassign the tenant${
+                            occupants.length === 1
+                                ? ""
+                                : "s"
+                        } before deleting this room.`
+                    );
+
+                    return;
+                }
+
+
+                const confirmed =
+                    window.confirm(
+                        `Delete Room ${room.number}?\n\n` +
+                        `This action cannot be undone.`
+                    );
+
+
+                if (!confirmed) return;
+
+
+                const updatedRooms =
+                    rooms.filter(
+                        item =>
+                            item.id !==
+                            room.id
+                    );
+
+
+                saveData(
+                    KEYS.rooms,
+                    updatedRooms
+                );
+
+
+                selectedRoomId =
+                    null;
+
+
+                viewRoomModal.style.display =
+                    "none";
+
+
+                renderRooms(
+                    roomSearch.value
+                );
+
+
+                alert(
+                    `Room ${room.number} has been deleted.`
+                );
+
             }
+        );
 
-            rooms.push({
-                id: `room-${Date.now()}`,
-                number,
-                rent
-            });
 
-            saveData(KEYS.rooms, rooms);
-            renderRooms(roomSearch.value);
-            roomModal.style.display = "none";
-            roomForm.reset();
-        });
+        /* =========================
+           ADD / EDIT ROOM FORM
+        ========================= */
+
+        roomForm.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+                roomFormError.textContent =
+                    "";
+
+
+                if (!roomForm.checkValidity()) {
+
+                    roomForm.reportValidity();
+
+                    return;
+                }
+
+
+                const number =
+                    document
+                        .getElementById(
+                            "roomNumber"
+                        )
+                        .value
+                        .trim();
+
+
+                const rent =
+                    Number(
+                        document
+                            .getElementById(
+                                "roomRent"
+                            )
+                            .value
+                    );
+
+
+                const rooms =
+                    readData(
+                        KEYS.rooms
+                    );
+
+
+                /* =====================
+                   EDIT EXISTING ROOM
+                ===================== */
+
+                if (editingRoomId) {
+
+                    const roomIndex =
+                        rooms.findIndex(
+                            room =>
+                                room.id ===
+                                editingRoomId
+                        );
+
+
+                    if (roomIndex === -1) {
+
+                        roomFormError.textContent =
+                            "Room record not found.";
+
+                        return;
+                    }
+
+
+                    /*
+                     * Prevent duplicate
+                     * room numbers.
+                     */
+
+                    const duplicate =
+                        rooms.some(
+                            room =>
+                                room.id !==
+                                    editingRoomId &&
+                                String(
+                                    room.number
+                                ).toLowerCase() ===
+                                    String(
+                                        number
+                                    ).toLowerCase()
+                        );
+
+
+                    if (duplicate) {
+
+                        roomFormError.textContent =
+                            "That room number already exists.";
+
+                        return;
+                    }
+
+
+                    const oldRoomNumber =
+                        rooms[
+                            roomIndex
+                        ].number;
+
+
+                    rooms[
+                        roomIndex
+                    ] = {
+
+                        ...rooms[
+                            roomIndex
+                        ],
+
+                        number,
+
+                        rent
+
+                    };
+
+
+                    /*
+                     * If the room number
+                     * changes, update tenants
+                     * assigned to that room.
+                     */
+
+                    if (
+                        String(
+                            oldRoomNumber
+                        ) !==
+                        String(
+                            number
+                        )
+                    ) {
+
+                        const tenants =
+                            readData(
+                                KEYS.tenants
+                            );
+
+
+                        let changed =
+                            false;
+
+
+                        tenants.forEach(
+                            tenant => {
+
+                                if (
+                                    String(
+                                        tenant.room
+                                    ) ===
+                                    String(
+                                        oldRoomNumber
+                                    )
+                                ) {
+
+                                    tenant.room =
+                                        number;
+
+                                    changed =
+                                        true;
+
+                                }
+
+                            }
+                        );
+
+
+                        if (changed) {
+
+                            saveData(
+                                KEYS.tenants,
+                                tenants
+                            );
+
+                        }
+
+                    }
+
+
+                    saveData(
+                        KEYS.rooms,
+                        rooms
+                    );
+
+
+                    renderRooms(
+                        roomSearch.value
+                    );
+
+
+                    roomModal.style.display =
+                        "none";
+
+
+                    roomForm.reset();
+
+                    editingRoomId =
+                        null;
+
+
+                    alert(
+                        `Room ${number}'s details have been updated.`
+                    );
+
+
+                    return;
+                }
+
+
+                /* =====================
+                   ADD NEW ROOM
+                ===================== */
+
+                if (
+                    rooms.some(
+                        room =>
+                            String(
+                                room.number
+                            ) ===
+                            String(
+                                number
+                            )
+                    )
+                ) {
+
+                    roomFormError.textContent =
+                        "That room number already exists.";
+
+                    return;
+                }
+
+
+                rooms.push({
+
+                    id:
+                        `room-${Date.now()}`,
+
+                    number,
+
+                    rent
+
+                });
+
+
+                saveData(
+                    KEYS.rooms,
+                    rooms
+                );
+
+
+                renderRooms(
+                    roomSearch.value
+                );
+
+
+                roomModal.style.display =
+                    "none";
+
+
+                roomForm.reset();
+
+            }
+        );
+
     }
 }
 
