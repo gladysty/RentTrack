@@ -836,3 +836,57 @@ th {
         width: 100%;
     }
 }
+
+/* =========================
+   ROOM MODAL ACTIONS
+========================= */
+
+.room-modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #edf0f5;
+}
+
+.edit-room-modal-button,
+.delete-room-modal-button {
+    flex: 1;
+    border: 0;
+    padding: 11px 16px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-room-modal-button {
+    background: #182848;
+    color: #fff;
+}
+
+.edit-room-modal-button:hover {
+    background: #101c34;
+}
+
+.delete-room-modal-button {
+    background: #b42318;
+    color: #fff;
+}
+
+.delete-room-modal-button:hover {
+    background: #8f1c13;
+}
+
+@media (max-width: 500px) {
+
+    .room-modal-actions {
+        flex-direction: column;
+    }
+
+    .edit-room-modal-button,
+    .delete-room-modal-button {
+        width: 100%;
+    }
+
+}
